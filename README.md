@@ -4,8 +4,8 @@ expense-tracker/
 ├── backend/                     # Node.js + Express + MongoDB
 │   ├── config/                  # DB connection, JWT config
 │   ├── controllers/             # Request handling logic
-│   ├── models/               # Mongoose schemas (User, Income, Expense)
-│   ├── routes/         # Express routes (auth, income, expense, dashboard)
+│   ├── models/                  # Mongoose schemas (User, Income, Expense)
+│   ├── routes/                  # Express routes (auth, income, expense, dashboard)
 │   ├── middleware/              # Auth middleware (JWT verification)
 │   ├── utils/                   # Helper functions (Excel export, validation)
 │   ├── uploads/                 # Profile photos / file uploads
@@ -16,10 +16,10 @@ expense-tracker/
 │   ├── public/                  # Static assets
 │   ├── src/
 │   │   ├── api/                 # Axios instance, API paths
-│   │   ├── components/ # Reusable UI components (Navbar, Sidebar, Cards)
+│   │   ├── components/          # Reusable UI components (Navbar, Sidebar, Cards)
 │   │   ├── context/             # UserContext (auth state, global data)
-│   │   ├── pages/  # Pages (Login, Signup, Dashboard, Income, Expenses, Reports)
-│   │   ├── charts/   # Chart components (PieChart, BarChart, LineChart)
+│   │   ├── pages/               # Pages (Login, Signup, Dashboard, Income, Expenses, Reports)
+│   │   ├── charts/              # Chart components (PieChart, BarChart, LineChart)
 │   │   ├── utils/               # Helper functions (formatCurrency, dateUtils)
 │   │   ├── App.js               # Main app with routes
 │   │   └── index.js             # React entry point
