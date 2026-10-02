@@ -3,14 +3,19 @@ const INK = "#0f172a";
 const TICKS = Array.from({ length: 48 }, (_, i) => (i * 360) / 48);
 
 // Coin-edge seal, used large in a corner or small inside a card.
-export const CurrencySeal = ({ className = "", opacity = 0.05, label = true }) => (
+export const CurrencySeal = ({
+  className = "",
+  opacity = 0.05,
+  label = true,
+  color = INK,
+}) => (
   <svg
     viewBox="0 0 240 240"
     aria-hidden="true"
     className={`pointer-events-none select-none ${className}`}
     style={{ opacity }}
     fill="none"
-    stroke={INK}
+    stroke={color}
   >
     <circle cx="120" cy="120" r="113" strokeWidth="2" />
     <circle cx="120" cy="120" r="99" strokeWidth="1" />
@@ -37,7 +42,7 @@ export const CurrencySeal = ({ className = "", opacity = 0.05, label = true }) =
           fontSize="54"
           fontWeight="700"
           letterSpacing="4"
-          fill={INK}
+          fill={color}
           stroke="none"
         >
           ETB
@@ -49,7 +54,7 @@ export const CurrencySeal = ({ className = "", opacity = 0.05, label = true }) =
           fontSize="12"
           fontWeight="600"
           letterSpacing="8"
-          fill={INK}
+          fill={color}
           stroke="none"
         >
           BIRR
@@ -65,6 +70,7 @@ export const CurrencyPattern = ({
   opacity = 0.03,
   tileId,
   rotate = -8,
+  color = INK,
 }) => (
   <svg
     aria-hidden="true"
@@ -79,7 +85,7 @@ export const CurrencyPattern = ({
         patternUnits="userSpaceOnUse"
         patternTransform={`rotate(${rotate})`}
       >
-        <g fill="none" stroke={INK} strokeWidth="1">
+        <g fill="none" stroke={color} strokeWidth="1">
           <rect x="77" y="92" width="56" height="30" rx="5" />
           <rect x="83" y="98" width="44" height="18" rx="3" />
           <circle cx="105" cy="107" r="5" />

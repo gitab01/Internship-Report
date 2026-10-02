@@ -10,6 +10,9 @@ node_modules/
 dist/
 build/
 
+# vercel project link
+.vercel/
+
 # runtime uploads (multer writes here)
 Expense Tracker/backend/uploads/*
 !Expense Tracker/backend/uploads/.gitkeep

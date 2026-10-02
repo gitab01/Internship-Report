@@ -16,8 +16,8 @@ const TransactionInfoCard = ({
   const income = type === "income";
 
   return (
-    <div className="group relative flex items-center gap-3 py-3 border-b border-line last:border-0">
-      <div className="shrink-0 w-10 h-10 grid place-items-center text-lg bg-slate-50 border border-line rounded-xl">
+    <div className="group relative -mx-2 flex items-center gap-3 rounded-xl border-b border-line px-2 py-3 transition-colors last:border-0 hover:bg-slate-50">
+      <div className="shrink-0 w-10 h-10 grid place-items-center text-lg bg-white border border-line rounded-xl">
         {isImage(icon) ? (
           <img
             src={icon}
@@ -44,14 +44,14 @@ const TransactionInfoCard = ({
           type="button"
           aria-label="Delete transaction"
           onClick={onDelete}
-          className="shrink-0 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer p-1"
+          className="shrink-0 grid place-items-center w-8 h-8 rounded-lg text-slate-400 transition-colors cursor-pointer hover:bg-rose-50 hover:text-rose-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
         >
           <LuTrash2 size={16} />
         </button>
       )}
 
       <div
-        className={`num shrink-0 text-sm font-semibold ${
+        className={`num shrink-0 text-[15px] font-semibold ${
           income ? "text-emerald-700" : "text-rose-700"
         }`}
       >

@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import CustomTooltip from "./CustomTooltip";
 
-const shorten = (v) => (v.length > 10 ? `${v.slice(0, 9)}…` : v);
+const shorten = (v) => (v.length > 7 ? `${v.slice(0, 6)}…` : v);
 
 const CustomBarChart = ({ data = [], xKey = "category", height = 260 }) => {
   if (!data.length) {
@@ -39,7 +39,6 @@ const CustomBarChart = ({ data = [], xKey = "category", height = 260 }) => {
             stroke="#e6e8ec"
             tickLine={false}
             axisLine={false}
-            interval={0}
           />
           <YAxis
             domain={[0, top]}

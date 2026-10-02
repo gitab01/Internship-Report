@@ -4,24 +4,22 @@ import DashboardLayout from "../../components/layouts/DashboardLayout";
 import { useUserAuth } from "../../hooks/useUserAuth";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPath";
-import { IoMdCard } from "react-icons/io";
-import { LuHandCoins, LuWalletMinimal, LuRefreshCw } from "react-icons/lu";
-import InfoCard from "../../components/Cards/InfoCard";
+import { LuRefreshCw } from "react-icons/lu";
+import BalanceHero from "../../components/Dashboard/BalanceHero";
 import RecentTransactions from "../../components/Dashboard/RecentTransactions";
 import FinanceOverview from "../../components/Dashboard/FinanceOverview";
 import Last30DaysExpenses from "../../components/Dashboard/Last30DaysExpenses";
 import IncomeSources from "../../components/Dashboard/IncomeSources";
-import { formatMoney } from "../../utils/helper";
 
 const Skeleton = () => (
   <div className="grid gap-4 sm:gap-6">
-    <div className="grid gap-4 sm:grid-cols-3">
-      {[0, 1, 2].map((i) => (
-        <div key={i} className="card animate-pulse">
-          <div className="h-3 w-24 rounded bg-slate-100" />
-          <div className="mt-3 h-6 w-32 rounded bg-slate-100" />
-        </div>
-      ))}
+    <div className="hero animate-pulse">
+      <div className="h-3 w-24 rounded bg-white/10" />
+      <div className="mt-3 h-9 w-48 rounded bg-white/10" />
+      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <div className="h-6 rounded bg-white/10" />
+        <div className="h-6 rounded bg-white/10" />
+      </div>
     </div>
     <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
       <div className="card h-72 animate-pulse lg:col-span-2">
@@ -84,33 +82,12 @@ const Home = () => {
           </div>
         ) : (
           <>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <InfoCard
-                icon={<IoMdCard />}
-                label="Total balance"
-                amount={formatMoney(dashboardData?.totalBalance || 0)}
-                hint={`${savingsRate.toFixed(0)}% of income kept`}
-                tone="ink"
-              />
-              <InfoCard
-                icon={<LuWalletMinimal />}
-                label="Total income"
-                amount={formatMoney(income)}
-                hint={`${
-                  dashboardData?.last60DaysIncome?.transactions?.length || 0
-                } entries in last 60 days`}
-                tone="income"
-              />
-              <InfoCard
-                icon={<LuHandCoins />}
-                label="Total expense"
-                amount={formatMoney(expense)}
-                hint={`${
-                  dashboardData?.last30DaysExpenses?.transactions?.length || 0
-                } entries in last 30 days`}
-                tone="expense"
-              />
-            </div>
+            <BalanceHero
+              balance={dashboardData?.totalBalance || 0}
+              income={income}
+              expense={expense}
+              savingsRate={savingsRate}
+            />
 
             <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
               <div className="lg:col-span-2">

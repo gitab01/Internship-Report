@@ -50,7 +50,7 @@ const ExpenseOverview = ({ transactions = [], loading = false }) => {
 
       <dl className="mt-4 grid gap-4 sm:grid-cols-3">
         {cells.map((c) => (
-          <div key={c.label} className="rounded-xl border border-line p-4">
+          <div key={c.label} className="stat-tile">
             <dt className="section-label">{c.label}</dt>
             <dd
               className={`num mt-2 text-lg sm:text-xl font-bold truncate ${c.tone}`}
