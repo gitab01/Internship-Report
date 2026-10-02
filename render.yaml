@@ -3,7 +3,7 @@
 # service with these settings pre-filled.
 services:
   - type: web
-    name: expensia-api
+    name: expense-tracker-api
     runtime: node
     plan: free
     rootDir: Expense Tracker/backend
@@ -24,4 +24,4 @@ services:
         generateValue: true
       # The Vercel frontend origin, allowed by CORS.
       - key: CLIENT_URL
-        value: https://expensia-omega.vercel.app
+        value: https://expense-tracker-beige-nine-24.vercel.app

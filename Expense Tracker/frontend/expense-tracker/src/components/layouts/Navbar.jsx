@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { LuMenu, LuX, LuLogOut } from "react-icons/lu";
 import SideMenu from "./SideMenu";
+import BrandMark from "../Decor/BrandMark";
 import CharAvatar from "../Cards/CharAvatar";
 import { UserContext } from "../../context/UserContext";
 
@@ -30,12 +31,7 @@ const Navbar = ({ activeMenu }) => {
             {open ? <LuX size={20} /> : <LuMenu size={20} />}
           </button>
 
-          <span className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-slate-900">
-            <span className="grid h-7 w-7 place-items-center rounded-lg bg-slate-900 text-xs font-bold text-white">
-              E
-            </span>
-            Expensia
-          </span>
+          <BrandMark />
 
           <div className="ml-2 hidden lg:block">
             <SideMenu activeMenu={activeMenu} variant="inline" />

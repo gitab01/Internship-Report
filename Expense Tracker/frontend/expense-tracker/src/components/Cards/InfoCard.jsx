@@ -1,3 +1,5 @@
+import { CurrencySeal } from "../Decor/CurrencyWatermark";
+
 const TONES = {
   ink: { tile: "bg-slate-100 text-slate-900", value: "text-slate-900" },
   income: { tile: "bg-emerald-50 text-emerald-700", value: "text-emerald-700" },
@@ -8,8 +10,13 @@ const TONES = {
 const InfoCard = ({ icon, label, amount, hint, tone = "ink" }) => {
   const t = TONES[tone] || TONES.ink;
   return (
-    <div className="card flex items-start justify-between gap-4">
-      <div className="min-w-0">
+    <div className="card relative flex items-start justify-between gap-4 overflow-hidden">
+      <CurrencySeal
+        label={false}
+        className="absolute -bottom-14 -right-12 h-36 w-36"
+        opacity={0.05}
+      />
+      <div className="relative min-w-0">
         <p className="section-label">{label}</p>
         <p className={`num mt-2 text-xl sm:text-2xl font-bold ${t.value}`}>
           {amount}

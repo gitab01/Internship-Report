@@ -1,11 +1,11 @@
-# Expensia — Income & Expense Tracker
+# Expense Tracker
 
 A full-stack personal finance tracker built as an internship project. Record
 income and expenses in Ethiopian Birr, then read a dashboard of balance, cash
 flow, spending by category and income by source.
 
-**Live app:** https://expensia-omega.vercel.app
-**API:** https://expensia-api.onrender.com/api/health
+**Live app:** https://expense-tracker-beige-nine-24.vercel.app
+**API:** https://expense-tracker-api.onrender.com/api/health
 
 ## Stack
 
@@ -23,7 +23,8 @@ flow, spending by category and income by source.
 - Income and expense lists with per-entry delete and Excel export
 - Emoji icons per entry, optional profile photo upload
 - Responsive down to phone widths; ink-on-white interface with semantic
-  green/red money colours
+  green/red money colours and a faint ETB coin-and-banknote watermark behind
+  every screen
 
 ## Repository layout
 
@@ -74,17 +75,25 @@ the deployed value.
 
 ## Deployment
 
-- **Frontend → Vercel:** project root is `Expense Tracker/frontend/expense-tracker`;
-  `vercel.json` sets the Vite build and SPA rewrites.
+- **Frontend → Vercel:** project `expense-tracker`. `vercel.json` sets the Vite
+  build and SPA rewrites. In project Settings → General, **Root Directory must
+  be `Expense Tracker/frontend/expense-tracker`** — left at `.`, every
+  Git-triggered build fails in seconds because the repository root has no
+  `package.json`.
 - **Backend → Render:** create a New Blueprint from this repository.
   `render.yaml` supplies the service name, root directory, build and start
-  commands, health check and `CLIENT_URL`; you only paste `MONGO_URL`.
+  commands, health check and `CLIENT_URL`; you only paste `MONGO_URL`. Keep the
+  service named `expense-tracker-api` — that origin is baked into the client
+  bundle through `.env.production`, so renaming it means rebuilding the
+  frontend too.
 
 ## Known limitations
 
 - Profile images are written to the container's `uploads/` directory, which is
   ephemeral on Render's free tier — uploads disappear on redeploy. Object
   storage (S3 or Render Disk) is the fix.
-- The API's original Atlas cluster and its committed `.env` credentials were
-  exposed in this repository's history. Rotate the database password and issue
-  a new `JWT_SECRET` before trusting the deployment with real data.
+- The API's original Atlas connection string, including its database password,
+  was committed to this repository and is still readable in git history even
+  though the file is now untracked. Rotate that Atlas user's password and let
+  Render generate a fresh `JWT_SECRET` before trusting the deployment with real
+  data.
