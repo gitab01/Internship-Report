@@ -75,13 +75,13 @@ the deployed value.
 
 ## Deployment
 
-- **Frontend → Vercel:** project `expense-tracker`. The repository root holds no
-  `package.json`, so the root `vercel.json` tells Vercel to install and build
-  inside `Expense Tracker/frontend/expense-tracker` and serve its `dist/`. That
-  lets Git-triggered deploys work with Root Directory left at `.`. The
-  alternative is to set **Settings → General → Root Directory** to
-  `Expense Tracker/frontend/expense-tracker`, which makes the app's own
-  `vercel.json` the only config in play.
+- **Frontend → Vercel:** project `expense-tracker`. In Settings → General,
+  **Root Directory must be `Expense Tracker/frontend/expense-tracker`**, which
+  makes the app's own `vercel.json` the build config. A repository-root
+  `vercel.json` is not a substitute: the root has no `package.json`, so
+  Git-triggered builds fail in seconds, and Vercel also reads the root
+  `render.yaml` as a service manifest, which makes a root-level build command
+  ambiguous. Pointing Root Directory at the app folder avoids both.
 - **Backend → Render:** create a New Blueprint from this repository.
   `render.yaml` supplies the service name, root directory, build and start
   commands, health check and `CLIENT_URL`; you only paste `MONGO_URL`. Keep the
