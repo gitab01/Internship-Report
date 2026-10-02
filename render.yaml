@@ -15,8 +15,11 @@ services:
       # Render's Node installer honours this, so the build matches local dev.
       - key: NODE_VERSION
         value: 22.19.0
-      # Paste your MongoDB Atlas connection string when the blueprint creates
-      # the service - it is never stored in this file or in git.
+      # Paste your Atlas string when the blueprint creates the service - it is
+      # never stored in this file or in git. Drop the placeholder's angle
+      # brackets; they are not part of the value and leaving them in fails as
+      # "bad auth". Shape to paste:
+      # mongodb+srv://abelink:YOURPASSWORD@expensetracker.luu9hse.mongodb.net/?appName=expenseTracker
       - key: MONGO_URL
         sync: false
       # generateValue makes Render create a random secret at deploy time.
