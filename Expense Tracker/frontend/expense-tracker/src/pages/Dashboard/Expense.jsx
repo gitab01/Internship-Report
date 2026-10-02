@@ -1,97 +1,89 @@
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useUserAuth } from "../../hooks/useUserAuth";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPath";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import ExpenseOverview from "../../components/Expense/ExpenseOverview";
 import ExpenseList from "../../components/Expense/ExpenseList";
 import Modal from "../../components/Modal";
 import AddExpenseForm from "../../components/Expense/AddExpenseForm";
 import DeleteAlert from "../../components/DeleteAlert";
+import { LuPlus } from "react-icons/lu";
 
 const Expense = () => {
   useUserAuth();
 
   const [expenseData, setExpenseData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isAddExpenseModalOpen, setIsAddExpenseModalOpen] = useState(false);
-  const [openDeleteAlert, setOpenDeleteAlert] = useState({
-    show: false,
-    data: null,
-  });
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // Fetch all expense details
   const fetchExpenseDetails = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get(
-        API_PATHS.EXPENSE.GET_ALL_EXPENSE
+      const response = await axiosInstance.get(API_PATHS.EXPENSE.GET_ALL_EXPENSE);
+      const data = response.data;
+      setExpenseData(
+        Array.isArray(data) ? data : data ? Object.values(data) : []
       );
-      const data = Array.isArray(response.data)
-        ? response.data
-        : Object.values(response.data);
-      setExpenseData(data || []);
     } catch (error) {
       console.error("Failed to fetch expenses:", error);
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Failed to load expenses");
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Add new expense
+  useEffect(() => {
+    fetchExpenseDetails();
+  }, [fetchExpenseDetails]);
+
   const handleAddExpense = async (expense) => {
     const { category, amount, date, icon = "" } = expense;
 
     if (!category?.trim()) return toast.error("Category is required.");
-    if (!amount || isNaN(amount))
-      return toast.error("Amount should be a valid number.");
+    if (!amount || isNaN(amount) || Number(amount) <= 0)
+      return toast.error("Amount should be greater than 0.");
     if (!date) return toast.error("Date is required.");
 
     try {
       await axiosInstance.post(API_PATHS.EXPENSE.ADD_EXPENSE, {
-        category,
-        amount,
+        category: category.trim(),
+        amount: Number(amount),
         date,
         icon,
       });
-      setIsAddExpenseModalOpen(false);
-      toast.success("Expense added successfully");
+      setIsAddOpen(false);
+      toast.success("Expense added");
       fetchExpenseDetails();
+      return true;
     } catch (error) {
       console.error("Error adding expense:", error);
       toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to add expense"
+        error.response?.data?.message || "Failed to add expense"
       );
     }
   };
 
-  // Delete expense
   const deleteExpense = async (id) => {
     try {
       await axiosInstance.delete(API_PATHS.EXPENSE.DELETE_EXPENSE(id));
-      setOpenDeleteAlert({ show: false, data: null });
-      toast.success("Expense details deleted successfully");
+      setDeleteTarget(null);
+      toast.success("Expense deleted");
       fetchExpenseDetails();
     } catch (error) {
-      console.error(
-        "Error deleting expense:",
-        error.response?.data?.message || error.message
-      );
-      toast.error("Failed to delete expense. Please try again.");
+      console.error("Error deleting expense:", error);
+      toast.error("Failed to delete expense");
+      setDeleteTarget(null);
     }
   };
 
-  // Download expense details
-  const handleDownloadExpenseDetails = async () => {
+  const handleDownload = async () => {
     try {
-      const response = await axiosInstance.get(
-        API_PATHS.EXPENSE.DOWNLOAD_EXPENSE,
-        { responseType: "blob" }
-      );
+      const response = await axiosInstance.get(API_PATHS.EXPENSE.DOWNLOAD_EXPENSE, {
+        responseType: "blob",
+      });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -102,57 +94,57 @@ const Expense = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error downloading expense details:", error);
-      toast.error("Failed to download expense details. Please try again.");
+      toast.error("Failed to download expense details");
     }
   };
 
-  useEffect(() => {
-    fetchExpenseDetails();
-  }, [fetchExpenseDetails]);
-
   return (
     <DashboardLayout activeMenu="Expense">
-      <div className="my-5 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-6">
-          <ExpenseOverview
-            transactions={expenseData}
-            onAddExpense={() => setIsAddExpenseModalOpen(true)}
-            loading={loading}
-          />
+      <div className="grid gap-4 sm:gap-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900">
+              Expenses
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">
+              What you spent, and where it went.
+            </p>
+          </div>
+          <button className="add-btn" onClick={() => setIsAddOpen(true)}>
+            <LuPlus size={16} /> Add expense
+          </button>
         </div>
+
+        <ExpenseOverview transactions={expenseData} loading={loading} />
 
         <ExpenseList
           transactions={expenseData}
-          onDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
-          onDownload={handleDownloadExpenseDetails}
+          loading={loading}
+          onDelete={(id) => setDeleteTarget(id)}
+          onDownload={handleDownload}
         />
-
-        {/* Add Expense Modal */}
-        <Modal
-          isOpen={isAddExpenseModalOpen}
-          onClose={() => setIsAddExpenseModalOpen(false)}
-          title="Add Expense"
-          className="max-w-md"
-        >
-          <AddExpenseForm onAddExpense={handleAddExpense} />
-        </Modal>
-
-        {/* Delete Confirmation Modal */}
-        {openDeleteAlert.show && openDeleteAlert.data && (
-          <Modal
-            isOpen={openDeleteAlert.show}
-            onClose={() => setOpenDeleteAlert({ show: false, data: null })}
-            title="Delete Expense"
-            className="max-w-sm"
-          >
-            <DeleteAlert
-              content="Are you sure you want to delete this expense detail?"
-              onDelete={() => deleteExpense(openDeleteAlert.data)}
-              onCancel={() => setOpenDeleteAlert({ show: false, data: null })}
-            />
-          </Modal>
-        )}
       </div>
+
+      <Modal
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        title="Add expense"
+        description="Record something you spent."
+      >
+        <AddExpenseForm onAddExpense={handleAddExpense} />
+      </Modal>
+
+      <Modal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete expense"
+      >
+        <DeleteAlert
+          content="This expense entry will be removed permanently."
+          onDelete={() => deleteExpense(deleteTarget)}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      </Modal>
     </DashboardLayout>
   );
 };

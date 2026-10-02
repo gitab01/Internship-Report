@@ -37,6 +37,17 @@ export const addThousandsSeparator = (num) => {
   return isNegative ? `-${result}` : result;
 };
 
+/** Format an amount as Ethiopian Birr, e.g. 12,450 -> "ETB 12,450" */
+export const formatMoney = (amount) => {
+  const n = typeof amount === "string" ? parseFloat(amount) : Number(amount);
+  const safe = Number.isFinite(n) ? n : 0;
+  const hasCents = Math.abs(safe % 1) > 0;
+  return `ETB ${safe.toLocaleString("en-US", {
+    minimumFractionDigits: hasCents ? 2 : 0,
+    maximumFractionDigits: 2,
+  })}`;
+};
+
 /** Format as currency */
 export const formatCurrency = (amount, currency = "USD", locale = "en-US") => {
   const numberValue = typeof amount === "string" ? parseFloat(amount) : amount;
@@ -50,19 +61,28 @@ export const formatCurrency = (amount, currency = "USD", locale = "en-US") => {
   }).format(safeValue);
 };
 
-/** Prepare expense bar chart data */
+/** Prepare expense bar chart data, aggregated by category */
 export const prepareExpenseBarChartData = (data = []) => {
   if (!Array.isArray(data)) return [];
 
-  return data
-    .filter((item) => item && typeof item === "object")
-    .map((item, index) => ({
-      id: item?.id || `expense-${index}`,
-      category: item?.category?.trim() || item?.name?.trim() || "Unknown",
-      amount: Math.max(0, Number(item?.amount) || 0),
-      color: item?.color || getChartColor(index, "expense"),
+  const categoryTotals = {};
+  data.forEach((item) => {
+    if (!item || typeof item !== "object") return;
+    const amount = Number(item.amount);
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    const category =
+      (typeof item.category === "string" && item.category.trim()) ||
+      (typeof item.name === "string" && item.name.trim()) ||
+      "Other";
+    categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+  });
+
+  return Object.entries(categoryTotals)
+    .map(([category, amount], index) => ({
+      category,
+      amount,
+      color: getChartColor(index, "expense"),
     }))
-    .filter((item) => item.amount > 0)
     .sort((a, b) => b.amount - a.amount);
 };
 
@@ -138,9 +158,9 @@ export const prepareIncomePieChartData = (data = [], totalIncome = 0) => {
 /** Chart color generator */
 const getChartColor = (index, type = "default") => {
   const schemes = {
-    expense: ["#EF4444", "#F59E0B", "#D97706", "#B45309"],
-    income: ["#10B981", "#059669", "#047857", "#065F46"],
-    default: ["#3B82F6", "#8B5CF6", "#EC4899", "#F59E0B"],
+    expense: ["#e11d48", "#fb7185", "#fda4af", "#fecdd3", "#ffe4e6"],
+    income: ["#059669", "#34d399", "#6ee7b7", "#a7f3d0", "#d1fae5"],
+    default: ["#0f172a", "#334155", "#64748b", "#94a3b8", "#cbd5e1"],
   };
   const colors = schemes[type] || schemes.default;
   return colors[index % colors.length];

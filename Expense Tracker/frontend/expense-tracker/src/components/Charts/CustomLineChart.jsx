@@ -1,4 +1,3 @@
-import React from "react";
 import {
   XAxis,
   YAxis,
@@ -8,75 +7,63 @@ import {
   Area,
   AreaChart,
 } from "recharts";
-import PropTypes from "prop-types";
+import CustomTooltip from "./CustomTooltip";
 
-// Custom tooltip for the chart
-const CustomTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
-    const { name, amount } = payload[0].payload;
+const CustomLineChart = ({ data = [], height = 260 }) => {
+  const points = data
+    .map((d) => ({ name: d.name, amount: Number(d.amount) || 0 }))
+    .filter((d) => Number.isFinite(d.amount));
+
+  if (points.length < 2) {
     return (
-      <div className="bg-white shadow-md rounded-lg p-2 border border-gray-300">
-        <p className="text-xs font-semibold text-purple-800 mb-1">{name}</p>
-        <p className="text-sm text-gray-600">
-          Amount:{" "}
-          <span className="text-sm font-medium text-gray-900">
-            {amount.toLocaleString()}
-          </span>
-        </p>
+      <div className="grid h-56 place-items-center rounded-xl border border-dashed border-line text-sm text-slate-500">
+        Add at least two expenses to see the trend
       </div>
     );
   }
-  return null;
-};
 
-const CustomLineChart = ({ data = [] }) => {
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm">
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart
-          data={data}
-          margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
-        >
+    <div className="mt-4 w-full" style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={points} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <defs>
-            <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#EF4444" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
+            <linearGradient id="expenseFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#e11d48" stopOpacity={0.16} />
+              <stop offset="100%" stopColor="#e11d48" stopOpacity={0} />
             </linearGradient>
           </defs>
-
-          <CartesianGrid stroke="none" />
+          <CartesianGrid stroke="#eef1f4" vertical={false} />
           <XAxis
             dataKey="name"
-            tick={{ fontSize: 12, fill: "#555" }}
-            stroke="none"
+            tick={{ fontSize: 11, fill: "#64748b" }}
+            tickLine={false}
+            axisLine={false}
+            minTickGap={20}
           />
-          <YAxis tick={{ fontSize: 12, fill: "#555" }} stroke="none" />
+          <YAxis
+            width={64}
+            tick={{ fontSize: 11, fill: "#64748b" }}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(v) => v.toLocaleString("en-US")}
+          />
           <Tooltip
-            content={<CustomTooltip />}
-            cursor={{ stroke: "#EF4444", strokeWidth: 0.5 }}
+            cursor={{ stroke: "#cbd5e1" }}
+            content={<CustomTooltip nameKey="name" />}
           />
-
           <Area
             type="monotone"
             dataKey="amount"
-            stroke="#EF4444"
-            fill="url(#expenseGradient)"
-            strokeWidth={3}
-            dot={{ r: 3, fill: "#EF4444" }}
+            stroke="#e11d48"
+            fill="url(#expenseFill)"
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 4 }}
           />
         </AreaChart>
       </ResponsiveContainer>
     </div>
   );
-};
-
-CustomLineChart.propTypes = {
-  data: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string,
-      amount: PropTypes.number,
-    })
-  ),
 };
 
 export default CustomLineChart;

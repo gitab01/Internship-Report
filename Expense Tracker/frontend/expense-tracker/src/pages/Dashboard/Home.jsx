@@ -1,22 +1,36 @@
-import React, { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import { useUserAuth } from "../../hooks/useUserAuth";
-
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPath";
 import { IoMdCard } from "react-icons/io";
-import { LuHandCoins, LuWalletMinimal } from "react-icons/lu";
+import { LuHandCoins, LuWalletMinimal, LuRefreshCw } from "react-icons/lu";
 import InfoCard from "../../components/Cards/InfoCard";
 import RecentTransactions from "../../components/Dashboard/RecentTransactions";
-
-import { addThousandsSeparator } from "../../utils/helper";
 import FinanceOverview from "../../components/Dashboard/FinanceOverview";
-import ExpenseTransactions from "../../components/Dashboard/ExpenseTransactions";
 import Last30DaysExpenses from "../../components/Dashboard/Last30DaysExpenses";
+import IncomeSources from "../../components/Dashboard/IncomeSources";
+import { formatMoney } from "../../utils/helper";
 
-import RecentIncomeWithChart from "../../components/Dashboard/RecentIncomeWithChart";
-import RecentIncome from "../../components/Dashboard/RecentIncome";
+const Skeleton = () => (
+  <div className="grid gap-4 sm:gap-6">
+    <div className="grid gap-4 sm:grid-cols-3">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="card animate-pulse">
+          <div className="h-3 w-24 rounded bg-slate-100" />
+          <div className="mt-3 h-6 w-32 rounded bg-slate-100" />
+        </div>
+      ))}
+    </div>
+    <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
+      <div className="card h-72 animate-pulse lg:col-span-2">
+        <div className="h-4 w-40 rounded bg-slate-100" />
+      </div>
+      <div className="card h-72 animate-pulse" />
+    </div>
+  </div>
+);
 
 const Home = () => {
   useUserAuth();
@@ -25,107 +39,103 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchDashboardData = async () => {
-      try {
-        const response = await axiosInstance.get(API_PATHS.DASHBOARD.GET_DATA);
-        if (isMounted && response.data) {
-          setDashboardData(response.data);
-          setError(null);
-        }
-      } catch (err) {
-        console.error("Dashboard fetch error:", err);
-        if (isMounted) setError("Failed to load dashboard data.");
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-
-    return () => {
-      isMounted = false;
-    };
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axiosInstance.get(API_PATHS.DASHBOARD.GET_DATA);
+      setDashboardData(response.data);
+    } catch (err) {
+      console.error("Dashboard fetch error:", err);
+      setError("We couldn't load your dashboard.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // Centered loading with animated spinner
-  if (loading) {
-    return (
-      <DashboardLayout activeMenu="Dashboard">
-        <div className="flex items-center justify-center h-[70vh]">
-          <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-  if (error) {
-    return (
-      <DashboardLayout activeMenu="Dashboard">
-        <div className="flex items-center justify-center h-[70vh] text-red-500 text-lg">
-          {error}
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const income = dashboardData?.totalIncome || 0;
+  const expense = dashboardData?.totalExpense || 0;
+  const savingsRate = income > 0 ? ((income - expense) / income) * 100 : 0;
 
   return (
     <DashboardLayout activeMenu="Dashboard">
-      <div className="my-5 mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <InfoCard
-            icon={<IoMdCard />}
-            label="Total Balance"
-            value={addThousandsSeparator(dashboardData?.totalBalance || 0)}
-            color="bg-primary"
-          />
-          <InfoCard
-            icon={<LuWalletMinimal />}
-            label="Total Income"
-            value={addThousandsSeparator(dashboardData?.totalIncome || 0)}
-            color="bg-orange-500"
-          />
-          <InfoCard
-            icon={<LuHandCoins />}
-            label="Total Expense"
-            value={addThousandsSeparator(dashboardData?.totalExpense || 0)}
-            color="bg-red-500"
-          />
+      <div className="grid gap-4 sm:gap-6">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900">
+            Overview
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Where your money came in and went out.
+          </p>
         </div>
 
-        {dashboardData?.recentTransactions && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <RecentTransactions
-              transactions={dashboardData.recentTransactions || []}
-              onSeeMore={() => navigate("/expense")}
-            />
-            <FinanceOverview
-              totalBalance={dashboardData?.totalBalance || 0}
-              totalIncome={dashboardData?.totalIncome || 0}
-              totalExpense={dashboardData?.totalExpense || 0}
-            />
-            <ExpenseTransactions
-              transactions={
-                dashboardData?.last30DaysExpenses?.recentTransactions || []
-              }
-              onSeeMore={() => navigate("/expense")}
-            />
-            <Last30DaysExpenses
-              data={dashboardData?.last30DaysExpenses?.transactions || []}
-            />
-            <RecentIncomeWithChart
-              data={
-                dashboardData?.last60DaysIncome?.transactions?.slice(0, 4) || []
-              }
-              totalIncome={dashboardData?.totalIncome || 0}
-            />
-            <RecentIncome
-              transactions={dashboardData?.last60DaysIncome?.transactions || []}
-              onSeeMore={() => navigate("/income")}
-            />
+        {loading ? (
+          <Skeleton />
+        ) : error ? (
+          <div className="card grid place-items-center gap-3 py-16 text-center">
+            <p className="text-sm text-rose-600">{error}</p>
+            <button className="btn-ghost" onClick={fetchData}>
+              <LuRefreshCw size={14} /> Try again
+            </button>
           </div>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <InfoCard
+                icon={<IoMdCard />}
+                label="Total balance"
+                amount={formatMoney(dashboardData?.totalBalance || 0)}
+                hint={`${savingsRate.toFixed(0)}% of income kept`}
+                tone="ink"
+              />
+              <InfoCard
+                icon={<LuWalletMinimal />}
+                label="Total income"
+                amount={formatMoney(income)}
+                hint={`${
+                  dashboardData?.last60DaysIncome?.transactions?.length || 0
+                } entries in last 60 days`}
+                tone="income"
+              />
+              <InfoCard
+                icon={<LuHandCoins />}
+                label="Total expense"
+                amount={formatMoney(expense)}
+                hint={`${
+                  dashboardData?.last30DaysExpenses?.transactions?.length || 0
+                } entries in last 30 days`}
+                tone="expense"
+              />
+            </div>
+
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                <RecentTransactions
+                  transactions={dashboardData?.recentTransactions || []}
+                  onSeeMore={() => navigate("/expense")}
+                />
+              </div>
+              <FinanceOverview
+                totalBalance={dashboardData?.totalBalance || 0}
+                totalIncome={income}
+                totalExpense={expense}
+              />
+            </div>
+
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+              <Last30DaysExpenses
+                data={dashboardData?.last30DaysExpenses?.transactions || []}
+              />
+              <IncomeSources
+                transactions={dashboardData?.last60DaysIncome?.transactions || []}
+                onSeeMore={() => navigate("/income")}
+              />
+            </div>
+          </>
         )}
       </div>
     </DashboardLayout>

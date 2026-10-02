@@ -34,7 +34,7 @@ exports.registerUser = async (req, res) => {
 
     res.status(201).json({
       id: user._id,
-      user,
+      user: user.toPublicJSON(),
       token: generateToken(user._id),
     });
   } catch (err) {
@@ -67,7 +67,7 @@ exports.loginUser = async (req, res) => {
 
     res.status(200).json({
       id: user._id,
-      user,
+      user: user.toPublicJSON(),
       token: generateToken(user._id),
     });
   } catch (err) {

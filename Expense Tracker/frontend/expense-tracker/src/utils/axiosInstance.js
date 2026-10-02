@@ -3,41 +3,40 @@ import { BASE_URL } from "./apiPath";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
 });
 
-// Request Interceptor
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const accessToken = localStorage.getItem("token");
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`; // FIXED
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+axiosInstance.interceptors.request.use((config) => {
+  const accessToken = localStorage.getItem("token");
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
-);
+  return config;
+});
 
-// Response Interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response) {
-      if (error.response.status === 401) {
+    const status = error.response?.status;
+
+    if (status === 401) {
+      localStorage.removeItem("token");
+      if (!window.location.pathname.startsWith("/login")) {
         window.location.href = "/login";
-      } else if (error.response.status === 500) {
-        console.error("Server error. Please try again later.");
-      } else if (error.code === "ECONNABORTED") {
-        console.error("Request timeout. Please try again");
       }
-      return Promise.reject(error);
+    } else if (status === 500) {
+      console.error("Server error. Please try again later.");
+    } else if (error.code === "ECONNABORTED") {
+      console.error("Request timeout. Please try again");
     }
+
+    // Always reject: swallowing the error here left callers reading
+    // `.data` off undefined on network failures.
+    return Promise.reject(error);
   }
 );
 

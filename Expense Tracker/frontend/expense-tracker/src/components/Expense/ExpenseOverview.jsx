@@ -1,74 +1,71 @@
-import React, { useEffect, useState } from "react";
-import { LuPlus } from "react-icons/lu";
+import { useEffect, useState, useMemo } from "react";
 import CustomLineChart from "../Charts/CustomLineChart";
 import moment from "moment";
+import { formatMoney } from "../../utils/helper";
 
-// Prepare expense data for Recharts
-const prepareExpenseLineChartData = (data = []) => {
-  if (!Array.isArray(data)) return [];
-
-  const validData = data
-    .filter(
-      (item) =>
-        (item.date || item.createdAt || item.transactionDate) &&
-        !isNaN(Number(item.amount))
-    )
-    .sort(
-      (a, b) =>
-        new Date(a.date || a.createdAt || a.transactionDate) -
-        new Date(b.date || b.createdAt || b.transactionDate)
-    );
-
-  return validData.map((item) => ({
-    name: moment(item.date || item.createdAt || item.transactionDate).format(
-      "DD MMM"
-    ),
-    amount: Number(item.amount),
-  }));
-};
-
-// Format amounts with ETB
-const formatCurrency = (amount) =>
-  `ETB ${Number(amount || 0).toLocaleString()}`;
-
-const ExpenseOverview = ({ transactions = [], onAddExpense }) => {
+const ExpenseOverview = ({ transactions = [], loading = false }) => {
   const [chartData, setChartData] = useState([]);
 
-  useEffect(() => {
-    const preparedData = prepareExpenseLineChartData(transactions);
-    setChartData(preparedData);
+  const dailyTotals = useMemo(() => {
+    const totals = {};
+    transactions.forEach((item) => {
+      const date = item.date || item.createdAt;
+      const amount = Number(item.amount);
+      if (!date || !moment(date).isValid() || !Number.isFinite(amount)) return;
+      const key = moment(date).format("DD MMM");
+      totals[key] = (totals[key] || 0) + amount;
+    });
+    return Object.entries(totals)
+      .map(([name, amount]) => ({
+        name,
+        amount,
+        sort: moment(name, "DD MMM").valueOf(),
+      }))
+      .sort((a, b) => a.sort - b.sort);
   }, [transactions]);
 
+  useEffect(() => {
+    setChartData(dailyTotals);
+  }, [dailyTotals]);
+
+  const total = dailyTotals.reduce((s, d) => s + d.amount, 0);
+  const biggest = dailyTotals.reduce(
+    (max, d) => (d.amount > (max?.amount || 0) ? d : max),
+    null
+  );
+
+  const cells = [
+    { label: "Total spent", value: formatMoney(total), tone: "text-rose-700" },
+    { label: "Entries", value: String(transactions.length), tone: "text-slate-900" },
+    {
+      label: "Heaviest day",
+      value: biggest ? `${formatMoney(biggest.amount)} · ${biggest.name}` : "—",
+      tone: "text-slate-900",
+    },
+  ];
+
   return (
-    <div className="card p-4 shadow-md rounded-lg">
-      <div className="flex items-center justify-between">
-        <div>
-          <h5 className="text-lg font-semibold">Expense Overview</h5>
-          <p className="text-xs text-gray-400 mt-1">
-            Track your spending trends over time and gain insights into where
-            your money goes.
-          </p>
-        </div>
-        <button
-          className="flex items-center gap-1 px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 transition"
-          onClick={onAddExpense}
-        >
-          <LuPlus className="text-lg" />
-          Add Expense
-        </button>
-      </div>
-      <div className="mt-6">
-        {chartData.length > 0 ? (
-          <CustomLineChart
-            data={chartData.map((item) => ({
-              ...item,
-              amount: formatCurrency(item.amount),
-            }))}
-          />
-        ) : (
-          <p className="text-gray-400 text-sm">No expense data to display.</p>
-        )}
-      </div>
+    <div className="card">
+      <h5 className="card-title">Expense overview</h5>
+
+      <dl className="mt-4 grid gap-4 sm:grid-cols-3">
+        {cells.map((c) => (
+          <div key={c.label} className="rounded-xl border border-line p-4">
+            <dt className="section-label">{c.label}</dt>
+            <dd
+              className={`num mt-2 text-lg sm:text-xl font-bold truncate ${c.tone}`}
+            >
+              {c.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      {loading ? (
+        <div className="mt-4 h-60 animate-pulse rounded-xl bg-slate-50" />
+      ) : (
+        <CustomLineChart data={chartData} />
+      )}
     </div>
   );
 };

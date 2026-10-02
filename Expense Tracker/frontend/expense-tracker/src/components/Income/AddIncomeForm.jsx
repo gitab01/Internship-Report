@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Input from "../Inputs/Input";
 import EmojiPickerPopup from "../EmojiPickerPopup";
 
@@ -13,69 +13,66 @@ const AddIncomeForm = ({ onAddIncome }) => {
   const handleChange = (key, value) =>
     setIncome((prev) => ({ ...prev, [key]: value }));
 
-  const handleSubmit = () => {
-    if (!income.source || !income.amount || !income.date) {
-      alert("Please fill in all required fields.");
-      return;
-    }
+  const [saving, setSaving] = useState(false);
 
-    if (onAddIncome && typeof onAddIncome === "function") {
-      onAddIncome({
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (saving) return;
+    setSaving(true);
+    try {
+      const saved = await onAddIncome?.({
         ...income,
-        amount: Number(income.amount), // Ensure numeric amount
+        amount: Number(income.amount),
       });
-
-      // Reset form after submission
-      setIncome({ source: "", amount: "", date: "", icon: "" });
+      if (saved) setIncome({ source: "", amount: "", date: "", icon: "" });
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div>
-      {/* Emoji Picker */}
+    <form onSubmit={handleSubmit} className="grid gap-1">
       <EmojiPickerPopup
         icon={income.icon}
         onSelect={(selectedIcon) => handleChange("icon", selectedIcon)}
       />
 
-      {/* Income Source */}
       <Input
         value={income.source}
         onChange={({ target }) => handleChange("source", target.value)}
-        label="Income Source"
-        placeholder="Freelance, Salary, etc"
+        label="Source"
+        placeholder="Salary, Freelance, Gift…"
         type="text"
+        required
       />
 
-      {/* Amount */}
       <Input
         value={income.amount}
         onChange={({ target }) => handleChange("amount", target.value)}
         label="Amount (ETB)"
-        placeholder="Enter amount"
+        placeholder="0"
         type="number"
+        min="0"
+        step="0.01"
+        required
       />
 
-      {/* Date */}
       <Input
         value={income.date}
         onChange={({ target }) => handleChange("date", target.value)}
         label="Date"
-        placeholder="Select date"
         type="date"
+        required
       />
 
-      {/* Submit button */}
-      <div className="flex justify-end mt-6">
-        <button
-          type="button"
-          className="add-btn add-btn-fill"
-          onClick={handleSubmit}
-        >
-          Add Income
-        </button>
-      </div>
-    </div>
+      <button
+        type="submit"
+        disabled={saving}
+        className="add-btn w-full justify-center mt-2 disabled:opacity-70"
+      >
+        {saving ? "Adding…" : "Add income"}
+      </button>
+    </form>
   );
 };
 

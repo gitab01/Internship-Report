@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# local secrets — never commit these
+.env
+.env.local
+.env.*.local
+
+# build output
+dist/
+build/
+
+# runtime uploads (multer writes here)
+Expense Tracker/backend/uploads/*
+!Expense Tracker/backend/uploads/.gitkeep
+
+# logs & editor noise
+*.log
+npm-debug.log*
+.DS_Store
+.vscode/
+.idea/

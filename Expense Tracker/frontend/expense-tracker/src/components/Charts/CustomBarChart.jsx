@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BarChart,
   Bar,
@@ -11,60 +10,53 @@ import {
 } from "recharts";
 import CustomTooltip from "./CustomTooltip";
 
-const CustomBarChart = ({ data, height = 300 }) => {
-  // Handle different data formats
-  const chartData = Array.isArray(data)
-    ? data
-    : data?.labels?.map((label, index) => ({
-        month: label,
-        amount: data.datasets[0]?.data[index] || 0,
-      })) || [];
+const shorten = (v) => (v.length > 10 ? `${v.slice(0, 9)}…` : v);
 
-  // Function to alternate colors for bars
-  const getBarColor = (index) => {
-    const colors = ["#FF8042", "#0088FE", "#00C49F", "#FFBB28"];
-    return colors[index % colors.length];
-  };
-
-  // Early return if no data
-  if (!chartData || chartData.length === 0) {
+const CustomBarChart = ({ data = [], xKey = "category", height = 260 }) => {
+  if (!data.length) {
     return (
-      <div className="bg-white mt-6 p-4 rounded-lg shadow-md text-center py-12">
-        <p className="text-gray-500">No data available for chart</p>
+      <div className="grid h-56 place-items-center rounded-xl border border-dashed border-line text-sm text-slate-500">
+        No data to chart yet
       </div>
     );
   }
 
+  const max = Math.max(...data.map((d) => Number(d.amount) || 0), 0);
+  const top = max > 0 ? Math.ceil((max * 1.15) / 100) * 100 : 100;
+
   return (
-    <div className="bg-white mt-6 p-4 rounded-lg shadow-md">
+    <div className="mt-4 w-full overflow-hidden">
       <ResponsiveContainer width="100%" height={height}>
         <BarChart
-          data={chartData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          data={data}
+          margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <CartesianGrid stroke="#eef1f4" vertical={false} />
           <XAxis
-            dataKey="month"
-            tick={{ fontSize: 12, fill: "#666" }}
-            stroke="#e5e7eb"
+            dataKey={xKey}
+            tick={{ fontSize: 11, fill: "#64748b" }}
+            tickFormatter={shorten}
+            stroke="#e6e8ec"
             tickLine={false}
+            axisLine={false}
+            interval={0}
           />
           <YAxis
-            tick={{ fontSize: 12, fill: "#666" }}
-            stroke="#e5e7eb"
+            domain={[0, top]}
+            width={64}
+            tick={{ fontSize: 11, fill: "#64748b" }}
+            stroke="#e6e8ec"
             tickLine={false}
-            tickFormatter={(value) => `ETB ${value.toLocaleString()}`}
+            axisLine={false}
+            tickFormatter={(v) => v.toLocaleString("en-US")}
           />
           <Tooltip
-            content={CustomTooltip}
-            formatter={(value, name) => [
-              `ETB ${value.toLocaleString()}`,
-              name === "month" ? "Month" : "Amount",
-            ]}
+            cursor={{ fill: "rgba(15,23,42,0.04)" }}
+            content={<CustomTooltip nameKey={xKey} />}
           />
-          <Bar dataKey="amount" radius={[8, 8, 0, 0]} barSize={32}>
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={getBarColor(index)} />
+          <Bar dataKey="amount" radius={[6, 6, 0, 0]} maxBarSize={36}>
+            {data.map((entry, index) => (
+              <Cell key={`${xKey}-${index}`} fill={entry.color || "#0f172a"} />
             ))}
           </Bar>
         </BarChart>

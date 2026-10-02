@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import AuthLayout from "../../components/layouts/AuthLayout";
 import Input from "../../components/Inputs/Input";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,14 +7,15 @@ import ProfilePhotoSelector from "../../components/Inputs/profilephotoSelector";
 import uploadImage from "../../utils/uploadImage";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPath";
-import { UserContext } from "../../context/userContext";
+import { UserContext } from "../../context/UserContext";
 
 const SignUp = () => {
   const [profilepic, setProfilepic] = useState(null);
-  const [fullName, setFullName] = useState(""); // ✅ renamed to match backend
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const navigate = useNavigate();
   const { updateUser } = useContext(UserContext);
@@ -22,107 +23,105 @@ const SignUp = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
 
-    let profileImageUrl = "";
-
-    if (!fullName) {
-      setError("Please enter your name");
-      return;
-    }
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address");
-      return;
-    }
-    if (!password) {
-      setError("Please enter your password");
-      return;
-    }
+    if (!fullName.trim()) return setError("Please enter your name");
+    if (!validateEmail(email)) return setError("Please enter a valid email address");
+    if (!password) return setError("Please enter your password");
+    if (password.length < 6)
+      return setError("Password should be at least 6 characters");
 
     setError("");
-
+    setBusy(true);
     try {
+      let profileImageUrl = "";
       if (profilepic) {
         const imgUploadRes = await uploadImage(profilepic);
         profileImageUrl = imgUploadRes.imageUrl || "";
       }
 
-      // ✅ Send fullName to match backend
       const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
-        fullName,
+        fullName: fullName.trim(),
         email,
         password,
         profileImageUrl,
       });
 
       const { token, user } = response.data;
-
       if (token) {
         localStorage.setItem("token", token);
         updateUser(user);
         navigate("/dashboard");
       }
-    } catch (error) {
-      if (error.response && error.response.data.message) {
-        setError(error.response.data.message);
-      } else {
-        setError("Something went wrong. Please try again.");
-      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Something went wrong. Please try again."
+      );
+    } finally {
+      setBusy(false);
     }
   };
 
   return (
     <AuthLayout>
-      <div className="lg:w-[100%] h-auto md:h-full mt-10 md:mt-0 flex flex-col justify-center">
-        <h3 className="text-xl font-semibold text-black">Create an Account</h3>
-        <p className="text-xs text-slate-700 mt-[5px] mb-6">
-          Join us today by entering your details below.
-        </p>
+      <h3 className="text-2xl font-semibold tracking-tight text-slate-900">
+        Create your account
+      </h3>
+      <p className="mt-1.5 text-sm text-slate-500">
+        Free, and takes less than a minute.
+      </p>
 
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+      <form onSubmit={handleSignUp} className="mt-8 grid gap-1">
+        <ProfilePhotoSelector setImage={setProfilepic} />
 
-        <form onSubmit={handleSignUp} className="space-y-4">
-          <ProfilePhotoSelector image={profilepic} setImage={setProfilepic} />
+        <Input
+          value={fullName}
+          onChange={({ target }) => setFullName(target.value)}
+          label="Full name"
+          placeholder="Abebe Kebede"
+          type="text"
+          autoComplete="name"
+        />
+        <Input
+          value={email}
+          onChange={({ target }) => setEmail(target.value)}
+          label="Email address"
+          placeholder="you@example.com"
+          type="email"
+          autoComplete="email"
+        />
+        <Input
+          value={password}
+          onChange={({ target }) => setPassword(target.value)}
+          label="Password"
+          placeholder="At least 6 characters"
+          type="password"
+          autoComplete="new-password"
+          hint="Use at least 6 characters."
+        />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              value={fullName}
-              onChange={({ target }) => setFullName(target.value)}
-              label="Full Name"
-              placeholder="Enter your full name"
-              type="text"
-            />
-            <Input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              label="Email Address"
-              placeholder="Enter your email"
-              type="text"
-            />
-            <div className="col-span-2">
-              <Input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                label="Password"
-                placeholder="Enter your password"
-                type="password"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary/90 transition"
-          >
-            Sign Up
-          </button>
-
-          <p className="text-sm text-center mt-4">
-            Already have an account?{" "}
-            <Link to="/login" className="text-primary hover:underline">
-              Login here
-            </Link>
+        {error && (
+          <p className="mb-2 mt-1 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            {error}
           </p>
-        </form>
-      </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={busy}
+          className="btn-primary mt-2 disabled:opacity-70"
+        >
+          {busy ? "Creating account…" : "Create account"}
+        </button>
+
+        <p className="mt-4 text-center lg:text-left text-sm text-slate-600">
+          Already registered?{" "}
+          <Link
+            to="/login"
+            className="font-medium text-slate-900 underline underline-offset-2"
+          >
+            Sign in
+          </Link>
+        </p>
+      </form>
     </AuthLayout>
   );
 };

@@ -1,70 +1,46 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
+import { LuX } from "react-icons/lu";
 
-const Modal = ({
-  children,
-  isOpen,
-  onClose,
-  title,
-  className = "",
-  overlayClassName = "fixed inset-0 bg-black/20 z-50 flex justify-center items-center w-full h-full overflow-y-auto overflow-x-hidden",
-  contentClassName = "relative p-4 w-full max-w-2xl max-h-full",
-}) => {
-  // Handle escape key press
+const Modal = ({ children, isOpen, onClose, title, description }) => {
   useEffect(() => {
     if (!isOpen) return;
-
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
+    const onKey = (e) => e.key === "Escape" && onClose?.();
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
     };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div className={overlayClassName}>
-      <div className={`${contentClassName} ${className}`}>
-        {/* Modal content */}
-        <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700 max-h-full overflow-hidden">
-          {/* Modal header */}
-          <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 overflow-y-auto"
+      onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}
+    >
+      <div className="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl border border-line shadow-xl">
+        <div className="flex items-start justify-between gap-4 px-5 sm:px-6 py-4 border-b border-line">
+          <div>
             {title && (
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                {title}
-              </h3>
+              <h3 className="text-base font-semibold text-slate-900">{title}</h3>
             )}
-            <button
-              type="button"
-              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer transition-colors"
-              onClick={onClose}
-              aria-label="Close modal"
-            >
-              <svg
-                className="w-3 h-3"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 14 14"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M13 1L1 13m0 0L13 1M1 13l12 0" // Fixed path - creates an X shape
-                />
-              </svg>
-            </button>
+            {description && (
+              <p className="text-xs text-slate-500 mt-0.5">{description}</p>
+            )}
           </div>
-
-          {/* Modal body */}
-          <div className="p-4 md:p-5 space-y-4 max-h-[calc(100vh-12rem)] overflow-y-auto">
-            {children}
-          </div>
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="-mr-1 p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
+          >
+            <LuX size={18} />
+          </button>
+        </div>
+        <div className="px-5 sm:px-6 py-5 max-h-[70vh] overflow-y-auto">
+          {children}
         </div>
       </div>
     </div>

@@ -10,6 +10,9 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
+// Render terminates TLS, so req.protocol must come from the proxy headers.
+app.set("trust proxy", 1);
+
 // Middleware to handle CORS
 app.use(
   cors({
@@ -21,6 +24,10 @@ app.use(
 app.use(express.json());
 
 connectDB();
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", uptime: Math.round(process.uptime()) });
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/income", incomeRoutes);

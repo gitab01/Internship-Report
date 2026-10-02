@@ -1,16 +1,25 @@
-import React from "react";
+const TONES = {
+  ink: { tile: "bg-slate-100 text-slate-900", value: "text-slate-900" },
+  income: { tile: "bg-emerald-50 text-emerald-700", value: "text-emerald-700" },
+  expense: { tile: "bg-rose-50 text-rose-700", value: "text-rose-700" },
+  accent: { tile: "bg-blue-50 text-blue-700", value: "text-slate-900" },
+};
 
-const InfoCard = ({ icon, label, value, color }) => {
+const InfoCard = ({ icon, label, amount, hint, tone = "ink" }) => {
+  const t = TONES[tone] || TONES.ink;
   return (
-    <div className="flex gap-6 bg-white p-6 rounded-2xl shadow-md shadow-gray-100 border border-gray-200/50">
+    <div className="card flex items-start justify-between gap-4">
+      <div className="min-w-0">
+        <p className="section-label">{label}</p>
+        <p className={`num mt-2 text-xl sm:text-2xl font-bold ${t.value}`}>
+          {amount}
+        </p>
+        {hint && <p className="text-xs text-slate-500 mt-1.5">{hint}</p>}
+      </div>
       <div
-        className={`w-14 h-14 flex items-center justify-center text-[26px] text-white ${color} rounded-full drop-shadow-xl`}
+        className={`shrink-0 w-10 h-10 sm:w-11 sm:h-11 grid place-items-center text-lg sm:text-xl rounded-xl ${t.tile}`}
       >
         {icon}
-      </div>
-      <div>
-        <h6 className="text-sm text-gray-500 mb-1">{label}</h6>
-        <span className="text-[22px]">ETB:{value}</span>
       </div>
     </div>
   );

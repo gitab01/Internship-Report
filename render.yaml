@@ -1,0 +1,27 @@
+# Render Blueprint - https://render.com/docs/blueprint-spec
+# Connect this repository in the Render dashboard and it will create the API
+# service with these settings pre-filled.
+services:
+  - type: web
+    name: expensia-api
+    runtime: node
+    plan: free
+    rootDir: Expense Tracker/backend
+    buildCommand: npm ci
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # Render's Node installer honours this, so the build matches local dev.
+      - key: NODE_VERSION
+        value: 22.19.0
+      # Paste your MongoDB Atlas connection string when the blueprint creates
+      # the service - it is never stored in this file or in git.
+      - key: MONGO_URL
+        sync: false
+      # generateValue makes Render create a random secret at deploy time.
+      - key: JWT_SECRET
+        generateValue: true
+      # The Vercel frontend origin, allowed by CORS.
+      - key: CLIENT_URL
+        value: https://expensia-omega.vercel.app

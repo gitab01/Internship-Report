@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { LuImage, LuX } from "react-icons/lu";
 
@@ -6,31 +6,49 @@ const EmojiPickerPopup = ({ icon, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex flex-col md:flex-row items-start gap-5 mb-6">
-      {/* Trigger */}
-      <div
-        className="flex items-center gap-4 cursor-pointer"
-        onClick={() => setIsOpen(true)}
-      >
-        <div className="w-12 h-12 flex items-center justify-center text-2xl bg-purple-50 text-primary rounded-lg">
-          {icon ? <span className="text-2xl">{icon}</span> : <LuImage />}
-        </div>
-        <p>{icon ? "Change Icon" : "Pick Icon"}</p>
-      </div>
+    <div className="mb-2">
+      <p className="text-[13px] font-medium text-slate-700">Icon</p>
 
-      {/* Emoji Picker Popup */}
-      {isOpen && (
-        <div className="relative">
+      <div className="mt-1.5 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setIsOpen((v) => !v)}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-white text-xl hover:border-slate-300 cursor-pointer"
+          aria-label={icon ? "Change icon" : "Pick icon"}
+        >
+          {icon ? <span aria-hidden="true">{icon}</span> : <LuImage className="text-slate-400" size={18} />}
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsOpen((v) => !v)}
+          className="text-sm text-slate-600 hover:text-slate-900 cursor-pointer"
+        >
+          {icon ? "Change icon" : "Pick an icon"}
+        </button>
+        {icon && (
           <button
             type="button"
-            className="w-7 h-7 flex items-center justify-center bg-white border border-gray-200 rounded-full absolute top-2 right-2 z-10 cursor-pointer"
-            onClick={() => setIsOpen(false)}
+            onClick={() => onSelect("")}
+            className="ml-auto p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+            aria-label="Clear icon"
           >
-            <LuX />
+            <LuX size={16} />
           </button>
+        )}
+      </div>
+
+      {isOpen && (
+        <div className="mt-3 max-h-80 w-full overflow-auto rounded-xl border border-line bg-white p-1">
           <EmojiPicker
-            open={isOpen}
-            onEmojiClick={(emojiObject) => onSelect(emojiObject.emoji)}
+            onEmojiClick={(emojiObject) => {
+              onSelect(emojiObject.emoji);
+              setIsOpen(false);
+            }}
+            previewConfig={{ showPreview: false }}
+            searchDisabled
+            skinTonesDisabled
+            emojiSize={20}
+            emojiStyle="native"
           />
         </div>
       )}

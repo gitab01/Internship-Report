@@ -1,0 +1,90 @@
+# Expensia — Income & Expense Tracker
+
+A full-stack personal finance tracker built as an internship project. Record
+income and expenses in Ethiopian Birr, then read a dashboard of balance, cash
+flow, spending by category and income by source.
+
+**Live app:** https://expensia-omega.vercel.app
+**API:** https://expensia-api.onrender.com/api/health
+
+## Stack
+
+| Layer    | Tech                                                        |
+| -------- | ----------------------------------------------------------- |
+| Frontend | React 19, Vite 7, Tailwind CSS 4, Recharts, React Router 7  |
+| Backend  | Node 22, Express 5, Mongoose 8, JWT auth, Multer, SheetJS   |
+| Database | MongoDB (Atlas or local)                                    |
+
+## Features
+
+- Email + password accounts with JWT sessions and bcrypt hashing
+- Dashboard: total balance, income, expense, savings rate
+- Cash-flow donut, spending-by-category bars, income-by-source breakdown
+- Income and expense lists with per-entry delete and Excel export
+- Emoji icons per entry, optional profile photo upload
+- Responsive down to phone widths; ink-on-white interface with semantic
+  green/red money colours
+
+## Repository layout
+
+```
+Expense Tracker/
+  backend/    Express API (Mongoose models, controllers, routes)
+  frontend/expense-tracker/   Vite + React client
+render.yaml   Render blueprint for the API
+Intership Report.pdf          Project documentation
+```
+
+## Running locally
+
+Requirements: Node 18+ and a MongoDB server (local or Atlas).
+
+**1. Backend**
+
+```bash
+cd "Expense Tracker/backend"
+cp .env.example .env       # then set MONGO_URL and JWT_SECRET
+npm install
+npm run dev                # http://localhost:8000
+```
+
+**2. Frontend** (second terminal)
+
+```bash
+cd "Expense Tracker/frontend/expense-tracker"
+cp .env.example .env.local # VITE_API_BASE_URL defaults to http://localhost:8000
+npm install
+npm run dev                # http://localhost:5173
+```
+
+## Environment variables
+
+Backend (`Expense Tracker/backend/.env`, see `.env.example`):
+
+| Variable     | Purpose                                     |
+| ------------ | ------------------------------------------- |
+| `MONGO_URL`  | MongoDB connection string                   |
+| `JWT_SECRET` | Signs auth tokens; long random string       |
+| `PORT`       | API port (Render injects this)              |
+| `CLIENT_URL` | Origin allowed by CORS                      |
+
+Frontend (`VITE_API_BASE_URL`): the API origin the client calls. It is baked
+into the browser bundle, so it is public by nature — `.env.production` holds
+the deployed value.
+
+## Deployment
+
+- **Frontend → Vercel:** project root is `Expense Tracker/frontend/expense-tracker`;
+  `vercel.json` sets the Vite build and SPA rewrites.
+- **Backend → Render:** create a New Blueprint from this repository.
+  `render.yaml` supplies the service name, root directory, build and start
+  commands, health check and `CLIENT_URL`; you only paste `MONGO_URL`.
+
+## Known limitations
+
+- Profile images are written to the container's `uploads/` directory, which is
+  ephemeral on Render's free tier — uploads disappear on redeploy. Object
+  storage (S3 or Render Disk) is the fix.
+- The API's original Atlas cluster and its committed `.env` credentials were
+  exposed in this repository's history. Rotate the database password and issue
+  a new `JWT_SECRET` before trusting the deployment with real data.

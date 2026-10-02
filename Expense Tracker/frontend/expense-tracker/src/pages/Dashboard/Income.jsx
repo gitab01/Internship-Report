@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPath";
@@ -6,32 +6,24 @@ import IncomeOverview from "../../components/Income/IncomeOverview";
 import IncomeList from "../../components/Income/IncomeList";
 import Modal from "../../components/Modal";
 import AddIncomeForm from "../../components/Income/AddIncomeForm";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import DeleteAlert from "../../components/DeleteAlert";
 import { useUserAuth } from "../../hooks/useUserAuth";
+import { LuPlus } from "react-icons/lu";
 
 const Income = () => {
   useUserAuth();
   const [incomeData, setIncomeData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isAddIncomeModalOpen, setIsAddIncomeModalOpen] = useState(false);
-  const [openDeleteAlert, setOpenDeleteAlert] = useState({
-    show: false,
-    data: null,
-  });
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // Fetch all income details
   const fetchIncomeDetails = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axiosInstance.get(API_PATHS.INCOME.GET_ALL_INCOME);
       const data = response.data;
-      const processedData = Array.isArray(data)
-        ? data
-        : data
-        ? Object.values(data)
-        : [];
-      setIncomeData(processedData);
+      setIncomeData(Array.isArray(data) ? data : data ? Object.values(data) : []);
     } catch (error) {
       console.error("Failed to fetch income data:", error);
       toast.error("Failed to load income data");
@@ -41,43 +33,58 @@ const Income = () => {
     }
   }, []);
 
-  // Handle adding new income
+  useEffect(() => {
+    fetchIncomeDetails();
+  }, [fetchIncomeDetails]);
+
   const handleAddIncome = async (income) => {
     const { source, amount, date, icon } = income;
 
     if (!source?.trim()) return toast.error("Source is required.");
     if (!amount || isNaN(amount) || Number(amount) <= 0)
-      return toast.error("Amount should be a valid number greater than 0.");
+      return toast.error("Amount should be greater than 0.");
     if (!date) return toast.error("Date is required.");
 
     try {
-      const payload = {
+      await axiosInstance.post(API_PATHS.INCOME.ADD_INCOME, {
         source: source.trim(),
         amount: Number(amount),
         date,
         icon: icon || null,
-      };
-      await axiosInstance.post(API_PATHS.INCOME.ADD_INCOME, payload);
-      setIsAddIncomeModalOpen(false);
-      toast.success("Income added successfully");
+      });
+      setIsAddOpen(false);
+      toast.success("Income added");
       await fetchIncomeDetails();
+      return true;
     } catch (error) {
       console.error("Error adding income:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to add income";
-      toast.error(errorMessage);
+      toast.error(
+        error.response?.data?.message || error.message || "Failed to add income"
+      );
     }
   };
 
-  // Handle downloading income
-  const handleDownloadIncomeDetails = async () => {
+  const handleDeleteIncome = async (id) => {
+    if (!id) return toast.error("Invalid income ID");
     try {
-      const response = await axiosInstance.get(
-        API_PATHS.INCOME.DOWNLOAD_INCOME,
-        { responseType: "blob" }
+      await axiosInstance.delete(API_PATHS.INCOME.DELETE_INCOME(id));
+      toast.success("Income deleted");
+      setDeleteTarget(null);
+      await fetchIncomeDetails();
+    } catch (error) {
+      console.error("Error deleting income:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to delete income"
       );
+      setDeleteTarget(null);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.INCOME.DOWNLOAD_INCOME, {
+        responseType: "blob",
+      });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -88,105 +95,59 @@ const Income = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error downloading income details:", error);
-      toast.error("Failed to download income details. Please try again.");
+      toast.error("Failed to download income details");
     }
   };
-
-  // Handle deleting income
-  const handleDeleteIncome = async (id) => {
-    if (!id) return toast.error("Invalid income ID");
-
-    try {
-      const deleteUrl = `/api/income/${id}`;
-      await axiosInstance.delete(deleteUrl);
-      toast.success("Income deleted successfully");
-      setOpenDeleteAlert({ show: false, data: null });
-      await fetchIncomeDetails();
-    } catch (error) {
-      console.error("Error deleting income:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to delete income";
-      toast.error(errorMessage);
-      setOpenDeleteAlert({ show: false, data: null });
-    }
-  };
-
-  useEffect(() => {
-    fetchIncomeDetails();
-  }, [fetchIncomeDetails]);
 
   return (
     <DashboardLayout activeMenu="Income">
-      <div className="my-5 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <IncomeOverview
-            transactions={incomeData}
-            onAddIncome={() => setIsAddIncomeModalOpen(true)}
-            loading={loading}
-          />
+      <div className="grid gap-4 sm:gap-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900">
+              Income
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Every amount you received, by source.
+            </p>
+          </div>
+          <button className="add-btn" onClick={() => setIsAddOpen(true)}>
+            <LuPlus size={16} /> Add income
+          </button>
         </div>
 
-        {!loading && incomeData.length > 0 && (
-          <div className="mt-6">
-            <IncomeList
-              transactions={incomeData}
-              onDelete={(transactionId) =>
-                transactionId
-                  ? setOpenDeleteAlert({ show: true, data: transactionId })
-                  : toast.error("Invalid income ID")
-              }
-              onDownload={handleDownloadIncomeDetails}
-            />
-          </div>
-        )}
+        <IncomeOverview transactions={incomeData} loading={loading} />
 
-        {loading && (
-          <div className="mt-6 text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-            <p className="mt-2 text-gray-600">Loading income data...</p>
-          </div>
-        )}
-
-        {/* Add Income Modal */}
-        <Modal
-          isOpen={isAddIncomeModalOpen}
-          onClose={() => setIsAddIncomeModalOpen(false)}
-          title="Add Income"
-          className="max-w-md"
-        >
-          <AddIncomeForm onAddIncome={handleAddIncome} />
-        </Modal>
-
-        {/* Delete Confirmation Modal */}
-        {openDeleteAlert.show && openDeleteAlert.data && (
-          <Modal
-            isOpen={openDeleteAlert.show}
-            onClose={() => setOpenDeleteAlert({ show: false, data: null })}
-            title="Delete Income"
-            className="max-w-sm"
-          >
-            <DeleteAlert
-              content="Are you sure you want to delete this income detail?"
-              onDelete={() => handleDeleteIncome(openDeleteAlert.data)}
-              onCancel={() => setOpenDeleteAlert({ show: false, data: null })}
-            />
-          </Modal>
-        )}
-
-        {!loading && incomeData.length === 0 && (
-          <div className="mt-6 text-center py-12">
-            <p className="text-gray-500 mb-4">No income records found.</p>
-            <button
-              onClick={() => setIsAddIncomeModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-            >
-              Add Your First Income
-            </button>
-          </div>
-        )}
+        <IncomeList
+          transactions={incomeData}
+          loading={loading}
+          onDelete={(id) =>
+            id ? setDeleteTarget(id) : toast.error("Invalid income ID")
+          }
+          onDownload={handleDownload}
+        />
       </div>
+
+      <Modal
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        title="Add income"
+        description="Record money you received."
+      >
+        <AddIncomeForm onAddIncome={handleAddIncome} />
+      </Modal>
+
+      <Modal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete income"
+      >
+        <DeleteAlert
+          content="This income entry will be removed permanently."
+          onDelete={() => handleDeleteIncome(deleteTarget)}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      </Modal>
     </DashboardLayout>
   );
 };

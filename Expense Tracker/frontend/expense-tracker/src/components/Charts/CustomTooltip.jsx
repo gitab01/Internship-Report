@@ -1,23 +1,18 @@
-import React from "react";
+import { formatMoney } from "../../utils/helper";
 
-const CustomTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-white shadow-md rounded-lg p-2 border border-gray-300">
-        <p className="text-xs font-semibold text-purple-800 mb-1">
-          {payload[0].name}
-        </p>
-        <p className="text-sm text-gray-600">
-          Amount:{" "}
-          <span className="text-sm font-medium text-gray-900">
-            ETB{payload[0].value}
-          </span>
-        </p>
-      </div>
-    );
-  }
+const CustomTooltip = ({ active, payload, nameKey = "name" }) => {
+  if (!active || !payload?.length) return null;
+  const entry = payload[0];
+  const label = entry.payload?.[nameKey] ?? entry.name;
 
-  return null;
+  return (
+    <div className="rounded-lg border border-line bg-white px-3 py-2 shadow-sm">
+      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <p className="num mt-0.5 text-sm font-semibold text-slate-900">
+        {formatMoney(entry.value)}
+      </p>
+    </div>
+  );
 };
 
 export default CustomTooltip;

@@ -1,66 +1,62 @@
-import React from "react";
-import {
-  LuUtensils,
-  LuTrendingUp,
-  LuTrendingDown,
-  LuTrash2,
-} from "react-icons/lu";
+import { LuUtensils, LuTrash2 } from "react-icons/lu";
+import { formatMoney } from "../../utils/helper";
+
+const isImage = (icon) =>
+  typeof icon === "string" && /^(https?:\/\/|\/|\.{0,2}\/)/.test(icon.trim());
 
 const TransactionInfoCard = ({
   title,
   icon,
   date,
   amount,
-  type,
+  type = "expense",
   hideDeleteBtn,
   onDelete,
 }) => {
-  // ✅ return styles properly
-  const getAmountStyles = () => {
-    return type === "income"
-      ? "bg-green-50 text-green-500"
-      : "bg-red-50 text-red-500";
-  };
+  const income = type === "income";
 
   return (
-    <div className="group relative flex items-center gap-4 mt-2 p-3 rounded-lg hover:bg-gray-100/60">
-      {/* Icon */}
-      <div className="w-12 h-12 flex items-center justify-center text-xl text-gray-800 bg-gray-100 rounded-full">
-        {icon ? (
-          <img src={icon} alt={title} className="w-6 h-6" />
+    <div className="group relative flex items-center gap-3 py-3 border-b border-line last:border-0">
+      <div className="shrink-0 w-10 h-10 grid place-items-center text-lg bg-slate-50 border border-line rounded-xl">
+        {isImage(icon) ? (
+          <img
+            src={icon}
+            alt=""
+            className="w-5 h-5 object-cover rounded-md"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        ) : icon ? (
+          <span aria-hidden="true">{icon}</span>
         ) : (
-          <LuUtensils />
+          <LuUtensils className="w-4 h-4 text-slate-500" />
         )}
       </div>
 
-      {/* Info + Amount */}
-      <div className="flex-1 flex items-center justify-between">
-        <div>
-          <p className="text-sm text-gray-700 font-medium">{title}</p>
-          <p className="text-xs text-gray-400 mt-1">{date}</p>
-        </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-slate-900">{title}</p>
+        <p className="text-xs text-slate-500 mt-0.5">{date}</p>
+      </div>
 
-        <div className="flex items-center gap-2">
-          {/* Delete Button */}
-          {!hideDeleteBtn && (
-            <button
-              className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-              onClick={onDelete}
-            >
-              <LuTrash2 size={18} />
-            </button>
-          )}
+      {!hideDeleteBtn && (
+        <button
+          type="button"
+          aria-label="Delete transaction"
+          onClick={onDelete}
+          className="shrink-0 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer p-1"
+        >
+          <LuTrash2 size={16} />
+        </button>
+      )}
 
-          {/* Amount */}
-          <div
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md ${getAmountStyles()}`}
-          >
-            <h6 className="text-xs font-medium">
-              {type === "income" ? "+" : "-"} ETB {amount}
-            </h6>
-            {type === "income" ? <LuTrendingUp /> : <LuTrendingDown />}
-          </div>
-        </div>
+      <div
+        className={`num shrink-0 text-sm font-semibold ${
+          income ? "text-emerald-700" : "text-rose-700"
+        }`}
+      >
+        {income ? "+" : "−"}
+        {formatMoney(amount)}
       </div>
     </div>
   );

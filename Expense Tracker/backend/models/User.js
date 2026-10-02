@@ -42,4 +42,16 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
+// Shape returned by the auth endpoints - never includes the password hash
+userSchema.methods.toPublicJSON = function () {
+  return {
+    _id: this._id,
+    fullName: this.fullName,
+    email: this.email,
+    profileImageUrl: this.profileImageUrl,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
+  };
+};
+
 module.exports = mongoose.model("User", userSchema);

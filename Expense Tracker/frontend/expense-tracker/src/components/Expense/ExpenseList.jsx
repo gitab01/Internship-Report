@@ -1,20 +1,31 @@
 import moment from "moment";
-import React from "react";
 import { LuDownload } from "react-icons/lu";
 import TransactionInfoCard from "../Cards/TransactionInfoCard";
 
-const ExpenseList = ({ transactions, onDelete, onDownload }) => {
-  return (
-    <div className="card">
-      <div className="flex items-center justify-between">
-        <h5 className="text-lg">All Expense</h5>
-        <button className="card-btn" onClick={onDownload}>
-          <LuDownload className="text-base" /> Download
-        </button>
+const ExpenseList = ({ transactions = [], loading, onDelete, onDownload }) => (
+  <div className="card">
+    <div className="flex items-center justify-between gap-3">
+      <div>
+        <h5 className="card-title">All expenses</h5>
+        <p className="text-xs text-slate-500 mt-0.5">
+          {transactions.length}{" "}
+          {transactions.length === 1 ? "entry" : "entries"}
+        </p>
       </div>
+      <button
+        className="card-btn"
+        onClick={onDownload}
+        disabled={!transactions.length}
+      >
+        <LuDownload size={14} /> Export
+      </button>
+    </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {transactions?.map((expense) => (
+    {loading ? (
+      <div className="mt-4 h-40 animate-pulse rounded-xl bg-slate-50" />
+    ) : transactions.length ? (
+      <div className="mt-2">
+        {transactions.map((expense) => (
           <TransactionInfoCard
             key={expense._id}
             title={expense.category}
@@ -26,8 +37,12 @@ const ExpenseList = ({ transactions, onDelete, onDownload }) => {
           />
         ))}
       </div>
-    </div>
-  );
-};
+    ) : (
+      <p className="py-10 text-center text-sm text-slate-500">
+        No expense entries yet.
+      </p>
+    )}
+  </div>
+);
 
 export default ExpenseList;

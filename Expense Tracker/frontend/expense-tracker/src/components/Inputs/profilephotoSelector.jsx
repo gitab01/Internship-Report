@@ -1,30 +1,25 @@
-import React, { useRef, useState } from "react";
-import { LuUser, LuUpload, LuTrash2 } from "react-icons/lu";
+import { useRef, useState } from "react";
+import { LuUser, LuCamera, LuTrash2 } from "react-icons/lu";
 
-const ProfilePhotoSelector = ({ image, setImage }) => {
+const ProfilePhotoSelector = ({ setImage }) => {
   const inputRef = useRef(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      setImage(file);
-      const preview = URL.createObjectURL(file);
-      setPreviewUrl(preview);
-    }
+    if (!file) return;
+    setImage(file);
+    setPreviewUrl(URL.createObjectURL(file));
   };
 
   const handleRemoveImage = () => {
     setImage(null);
     setPreviewUrl(null);
-  };
-
-  const onChooseFile = () => {
-    inputRef.current.click();
+    if (inputRef.current) inputRef.current.value = "";
   };
 
   return (
-    <div className="flex justify-center mb-6">
+    <div className="mb-5 flex items-center gap-4">
       <input
         type="file"
         accept="image/*"
@@ -33,33 +28,41 @@ const ProfilePhotoSelector = ({ image, setImage }) => {
         className="hidden"
       />
 
-      {!image ? (
-        <div className="w-20 h-20 flex items-center justify-center bg-purple-100 rounded-full relative">
-          <LuUser className="text-4xl text-primary" />
-          <button
-            type="button"
-            onClick={onChooseFile}
-            className="w-8 h-8 flex items-center justify-center bg-primary text-white rounded-full absolute bottom-1 right-1"
-          >
-            <LuUpload />
-          </button>
-        </div>
-      ) : (
-        <div className="relative">
+      <div className="relative h-16 w-16 shrink-0">
+        {previewUrl ? (
           <img
             src={previewUrl}
-            alt="Profile"
-            className="w-20 h-20 rounded-full object-cover"
+            alt="Profile preview"
+            className="h-16 w-16 rounded-full object-cover border border-line"
           />
+        ) : (
+          <div className="grid h-16 w-16 place-items-center rounded-full border border-line bg-slate-50 text-slate-400">
+            <LuUser size={22} />
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          aria-label="Choose profile photo"
+          className="absolute -bottom-0.5 -right-0.5 grid h-7 w-7 place-items-center rounded-full border-2 border-white bg-slate-900 text-white hover:bg-slate-800 cursor-pointer"
+        >
+          {previewUrl ? <LuTrash2 size={13} /> : <LuCamera size={13} />}
+        </button>
+      </div>
+
+      <div>
+        <p className="text-[13px] font-medium text-slate-700">Profile photo</p>
+        <p className="text-xs text-slate-500">Optional. PNG or JPG.</p>
+        {previewUrl && (
           <button
             type="button"
             onClick={handleRemoveImage}
-            className="w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full absolute bottom-1 right-1"
+            className="mt-1 text-xs font-medium text-slate-600 underline underline-offset-2 cursor-pointer"
           >
-            <LuTrash2 />
+            Remove
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

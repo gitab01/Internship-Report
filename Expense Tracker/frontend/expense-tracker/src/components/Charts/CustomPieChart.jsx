@@ -1,73 +1,72 @@
-import React from "react";
 import {
   PieChart,
   Pie,
   Cell,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
 import CustomTooltip from "./CustomTooltip";
-import CustomLegend from "./CustomLegend";
+import { formatMoney } from "../../utils/helper";
 
 const CustomPieChart = ({
-  data,
-  label,
-  totalAmount,
-  colors,
-  showTextAnchor,
+  data = [],
+  colors = ["#0f172a", "#e11d48", "#059669"],
+  centerLabel,
+  centerValue,
+  height = 220,
 }) => {
+  if (!data.length) {
+    return (
+      <div className="grid h-56 place-items-center rounded-xl border border-dashed border-line text-sm text-slate-500">
+        No data to chart yet
+      </div>
+    );
+  }
+
   return (
-    <ResponsiveContainer width="100%" height={380}>
-      <PieChart>
-        <Pie
-          data={data}
-          dataKey="amount"
-          nameKey="name"
-          cx="50%"
-          cy="50%"
-          outerRadius={130}
-          innerRadius={100}
-          labelLine={false}
-        >
-          {data.map((entry, index) => (
-            <Cell
-              key={`cell-ETB{index}`}
-              fill={colors[index % colors.length]}
-            />
-          ))}
-        </Pie>
+    <div className="relative w-full" style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="amount"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            outerRadius="92%"
+            innerRadius="66%"
+            paddingAngle={1}
+            stroke="#ffffff"
+            strokeWidth={2}
+          >
+            {data.map((entry, index) => (
+              <Cell
+                key={`${entry.name}-${index}`}
+                fill={entry.color || colors[index % colors.length]}
+              />
+            ))}
+          </Pie>
+          <Tooltip content={<CustomTooltip />} />
+        </PieChart>
+      </ResponsiveContainer>
 
-        <Tooltip content={<CustomTooltip />} />
-        <Legend content={CustomLegend} />
-
-        {showTextAnchor && (
-          <>
-            <text
-              x="50%"
-              y="50%"
-              dy={-25}
-              textAnchor="middle"
-              fill="#666"
-              fontSize="14px"
-            >
-              {label}
-            </text>
-            <text
-              x="50%"
-              y="50%"
-              dy={8}
-              textAnchor="middle"
-              fill="#333"
-              fontSize="24px"
-              fontWeight="600"
-            >
-              {totalAmount}
-            </text>
-          </>
-        )}
-      </PieChart>
-    </ResponsiveContainer>
+      {(centerLabel || centerValue) && (
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          {centerLabel && (
+            <p className="text-[11px] font-medium text-slate-500">
+              {centerLabel}
+            </p>
+          )}
+          {centerValue && (
+            <p className="num mt-0.5 text-base sm:text-lg font-bold text-slate-900">
+              {typeof centerValue === "number"
+                ? formatMoney(centerValue)
+                : centerValue}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 
