@@ -25,6 +25,6 @@ services:
       # generateValue makes Render create a random secret at deploy time.
       - key: JWT_SECRET
         generateValue: true
-      # The Vercel frontend origin, allowed by CORS.
+      # The Vercel frontend origins, allowed by CORS (comma-separated).
       - key: CLIENT_URL
-        value: https://expense-tracker-beige-nine-24.vercel.app
+        value: https://expense-tracker-beige-nine-24.vercel.app,https://expense-tracker-abelink2119s-projects.vercel.app

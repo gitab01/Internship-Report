@@ -14,9 +14,11 @@ const app = express();
 app.set("trust proxy", 1);
 
 // Middleware to handle CORS
+const clientOrigins = (process.env.CLIENT_URL || "").split(",").map((o) => o.trim()).filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "*",
+    origin: clientOrigins.length ? clientOrigins : "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
