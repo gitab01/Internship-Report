@@ -1,6 +1,7 @@
 import { LuDownload } from "react-icons/lu";
 import TransactionInfoCard from "../Cards/TransactionInfoCard";
 import moment from "moment";
+import { formatMoney, groupByMonth } from "../../utils/helper";
 
 const IncomeList = ({ transactions = [], loading, onDelete, onDownload }) => (
   <div className="card">
@@ -19,19 +20,29 @@ const IncomeList = ({ transactions = [], loading, onDelete, onDownload }) => (
     {loading ? (
       <div className="mt-4 h-40 animate-pulse rounded-xl bg-slate-50" />
     ) : transactions.length ? (
-      <div className="mt-2">
-        {transactions.map((income) => (
-          <TransactionInfoCard
-            key={income._id || income.id}
-            title={income.source || "Income"}
-            icon={income.icon}
-            date={
-              income.date ? moment(income.date).format("Do MMM YYYY") : "N/A"
-            }
-            amount={income.amount || 0}
-            type="income"
-            onDelete={() => onDelete(income._id)}
-          />
+      <div className="mt-1">
+        {groupByMonth(transactions).map((month) => (
+          <section key={month.key}>
+            <div className="flex items-baseline justify-between gap-3 px-2 pt-5 pb-1">
+              <h6 className="section-label">{month.label}</h6>
+              <span className="num text-xs font-semibold text-slate-500">
+                {formatMoney(month.total)}
+              </span>
+            </div>
+            {month.items.map((income) => (
+              <TransactionInfoCard
+                key={income._id || income.id}
+                title={income.source || "Income"}
+                icon={income.icon}
+                date={
+                  income.date ? moment(income.date).format("Do MMM YYYY") : "N/A"
+                }
+                amount={income.amount || 0}
+                type="income"
+                onDelete={() => onDelete(income._id)}
+              />
+            ))}
+          </section>
         ))}
       </div>
     ) : (

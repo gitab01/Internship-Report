@@ -30,6 +30,10 @@ const AuthLayout = ({ children }) => (
       <div className="flex flex-1 items-center py-10">
         <div className="w-full max-w-sm mx-auto lg:mx-0">{children}</div>
       </div>
+
+      <p className="border-t border-line pt-5 text-xs text-slate-500">
+        Every record belongs to the account that created it.
+      </p>
     </div>
 
     {/* Preview panel */}

@@ -16,6 +16,12 @@ const DashboardLayout = ({ children, activeMenu }) => (
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         {children}
       </main>
+      <footer className="mx-auto max-w-7xl px-4 pb-8 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-5 text-xs text-slate-500">
+          <span>Expense Tracker · amounts in Ethiopian Birr</span>
+          <span>{new Date().getFullYear()}</span>
+        </div>
+      </footer>
     </div>
   </div>
 );

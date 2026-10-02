@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -31,8 +31,9 @@
 }
 
 .num {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .input-box {
@@ -42,7 +43,8 @@
 
 .btn-primary {
   @apply w-full text-sm font-semibold text-white bg-slate-900 p-3 rounded-lg transition
-         hover:bg-slate-800 active:bg-slate-950 disabled:opacity-60 disabled:pointer-events-none;
+         shadow-[0_1px_2px_rgba(15,23,42,0.25)] hover:bg-slate-800 active:bg-slate-950 active:translate-y-px
+         disabled:opacity-60 disabled:pointer-events-none;
 }
 
 .btn-ghost {
@@ -83,7 +85,8 @@
 
 .add-btn {
   @apply inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-slate-900 px-4 py-2 rounded-lg
-         whitespace-nowrap transition hover:bg-slate-800 cursor-pointer;
+         whitespace-nowrap shadow-[0_1px_2px_rgba(15,23,42,0.25)] transition
+         hover:bg-slate-800 active:bg-slate-950 active:translate-y-px cursor-pointer;
 }
 
 .add-btn-fill {

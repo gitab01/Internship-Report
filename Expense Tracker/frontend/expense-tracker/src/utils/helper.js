@@ -166,6 +166,27 @@ const getChartColor = (index, type = "default") => {
   return colors[index % colors.length];
 };
 
+/** Bucket transactions into newest-first month sections with a running total */
+export const groupByMonth = (items = []) => {
+  const groups = new Map();
+
+  items.forEach((item) => {
+    const date = moment(item?.date || item?.createdAt);
+    if (!date.isValid()) return;
+
+    const key = date.format("YYYY-MM");
+    if (!groups.has(key)) {
+      groups.set(key, { key, label: date.format("MMMM YYYY"), total: 0, items: [] });
+    }
+
+    const group = groups.get(key);
+    group.items.push(item);
+    group.total += Math.max(0, Number(item?.amount) || 0);
+  });
+
+  return [...groups.values()].sort((a, b) => (a.key < b.key ? 1 : -1));
+};
+
 /** Format date */
 export const formatDate = (date, format = "MMM DD, YYYY") => {
   const d = moment(date);
