@@ -44,7 +44,7 @@ const ProfilePhotoSelector = ({ setImage }) => {
           type="button"
           onClick={() => inputRef.current?.click()}
           aria-label="Choose profile photo"
-          className="absolute -bottom-0.5 -right-0.5 grid h-7 w-7 place-items-center rounded-full border-2 border-white bg-slate-900 text-white hover:bg-slate-800 cursor-pointer"
+          className="absolute -bottom-0.5 -right-0.5 grid h-7 w-7 place-items-center rounded-full border-2 border-white bg-brand text-white hover:bg-brand-dark cursor-pointer"
         >
           {previewUrl ? <LuTrash2 size={13} /> : <LuCamera size={13} />}
         </button>

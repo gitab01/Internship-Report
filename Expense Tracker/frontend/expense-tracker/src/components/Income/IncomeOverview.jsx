@@ -21,7 +21,7 @@ const IncomeOverview = ({ transactions = [], loading = false }) => {
       (prepared?.labels || []).map((month, i) => ({
         month,
         amount: prepared.datasets?.[0]?.data[i] || 0,
-        color: "#059669",
+        color: "#7c3aed",
       }))
     );
   }, [transactions, loading]);

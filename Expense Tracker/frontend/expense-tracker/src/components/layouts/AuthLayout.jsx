@@ -63,7 +63,7 @@ const AuthLayout = ({ children }) => (
         </h3>
       </div>
 
-      <div className="relative overflow-hidden rounded-2xl bg-slate-900 p-6 text-white">
+      <div className="relative overflow-hidden rounded-2xl bg-brand-dark p-6 text-white">
         <CurrencySeal
           label={false}
           color="#ffffff"
@@ -91,7 +91,7 @@ const AuthLayout = ({ children }) => (
       <ul className="relative grid gap-4 border-t border-line pt-6">
         {FEATURES.map((f) => (
           <li key={f.title} className="flex gap-3">
-            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-900" />
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
             <div>
               <p className="text-sm font-semibold text-slate-900">{f.title}</p>
               <p className="mt-0.5 text-[13px] leading-snug text-slate-600">{f.body}</p>

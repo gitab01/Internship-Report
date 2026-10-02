@@ -50,11 +50,7 @@ const TransactionInfoCard = ({
         </button>
       )}
 
-      <div
-        className={`num shrink-0 text-[15px] font-semibold ${
-          income ? "text-emerald-700" : "text-rose-700"
-        }`}
-      >
+      <div className={`num shrink-0 ${income ? "chip-income" : "chip-expense"}`}>
         {income ? "+" : "−"}
         {formatMoney(amount)}
       </div>

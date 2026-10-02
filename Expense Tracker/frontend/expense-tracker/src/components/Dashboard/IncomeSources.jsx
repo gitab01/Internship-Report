@@ -47,7 +47,7 @@ const IncomeSources = ({ transactions = [], onSeeMore }) => {
               </div>
               <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                 <div
-                  className="h-full rounded-full bg-emerald-500"
+                  className="h-full rounded-full bg-brand"
                   style={{ width: `${Math.round((row.amount / max) * 100)}%` }}
                 />
               </div>

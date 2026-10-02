@@ -10,7 +10,7 @@ import { formatMoney } from "../../utils/helper";
 
 const CustomPieChart = ({
   data = [],
-  colors = ["#0f172a", "#e11d48", "#059669"],
+  colors = ["#7c3aed", "#e11d48", "#059669"],
   centerLabel,
   centerValue,
   height = 220,

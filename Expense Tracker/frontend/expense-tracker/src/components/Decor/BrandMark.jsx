@@ -12,7 +12,7 @@ const BrandMark = ({ size = "sm", muted = false }) => {
       }`}
     >
       <span
-        className={`grid ${s.tile} place-items-center rounded-lg bg-slate-900 font-bold text-white`}
+        className={`grid ${s.tile} place-items-center rounded-lg bg-brand font-bold text-white`}
       >
         ET
       </span>

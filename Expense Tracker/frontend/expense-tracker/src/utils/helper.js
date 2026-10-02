@@ -159,7 +159,7 @@ export const prepareIncomePieChartData = (data = [], totalIncome = 0) => {
 const getChartColor = (index, type = "default") => {
   const schemes = {
     expense: ["#e11d48", "#fb7185", "#fda4af", "#fecdd3", "#ffe4e6"],
-    income: ["#059669", "#34d399", "#6ee7b7", "#a7f3d0", "#d1fae5"],
+    income: ["#7c3aed", "#a78bfa", "#8b5cf6", "#c4b5fd", "#ddd6fe"],
     default: ["#0f172a", "#334155", "#64748b", "#94a3b8", "#cbd5e1"],
   };
   const colors = schemes[type] || schemes.default;
